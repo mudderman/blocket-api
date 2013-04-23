@@ -32,6 +32,8 @@ import urllib2
 from hashlib import sha1
 from urllib import urlencode
 
+DEBUG = True
+
 class API:
 	app_id = None
 	api_key = None
@@ -55,8 +57,10 @@ class API:
 		return None
 
 	def perform_request (self, url, params = None, attempt = 0):
-		if (attempt >= 5):
-			print "Too many attempts, is your app id and api key correct?"
+		if (attempt >= 2):
+			if (DEBUG):
+				print "Too many attempts, is your app id and api key correct?"
+				print "Using app_id: \"%s\" and api_key: \"%s\"" % (self.app_id, self.api_key)
 			return None
 	
 		# Base request parameters
@@ -70,6 +74,7 @@ class API:
 			req_params['hash'] = self.generate_hash()
 
 		request = urllib2.Request(url + "?" + urlencode(req_params))
+		if DEBUG: print "Using url: %s?%s" % (url, urlencode(req_params))
 		response = urllib2.urlopen(request)
 
 		# Blocket use ISO-8859-1 encoding
@@ -88,6 +93,9 @@ class API:
 
 		return data
 
+	def get(self, endpoint, params = None):
+		return self.perform_request(self.url_base + endpoint + ".json", params)
+
 	def search (self, query, category=None, region=None):
 		params = {}
 		params['q'] = query
@@ -98,6 +106,18 @@ class API:
 
 		# Caller
 		if (region):
-						params['ca'] = region
+			params['ca'] = region
 
 		return self.perform_request(self.url_search, params)
+
+	def view(self, listing):
+		return self.get("view", { "ad_id": listing })
+
+	def related(self, listing):
+		return self.get("related_ads", { "ad_id": listing })
+
+	def categories(self):
+		return self.get("category_params")
+
+	def areas(self):
+		return self.get("areas")
