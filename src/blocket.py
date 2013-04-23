@@ -58,7 +58,7 @@ class API:
 
 	def perform_request (self, url, params = None, attempt = 0):
 		if (attempt >= 2):
-			if (DEBUG):
+			if DEBUG:
 				print "Too many attempts, is your app id and api key correct?"
 				print "Using app_id: \"%s\" and api_key: \"%s\"" % (self.app_id, self.api_key)
 			return None
@@ -76,6 +76,7 @@ class API:
 		request = urllib2.Request(url + "?" + urlencode(req_params))
 		if DEBUG: print "Using url: %s?%s" % (url, urlencode(req_params))
 		response = urllib2.urlopen(request)
+		if DEBUG: print response.info()
 
 		# Blocket use ISO-8859-1 encoding
 		http_data = response.read().decode('latin-1').encode('utf-8')
@@ -90,15 +91,19 @@ class API:
 				self.challenge = data['authorize']['challenge']
 				attempt+=1
 				return self.perform_request(url, params, attempt)
+			else:
+				print data
 
 		return data
 
 	def get(self, endpoint, params = None):
 		return self.perform_request(self.url_base + endpoint + ".json", params)
 
-	def search (self, query, category=None, region=None):
+	def search (self, query=None, category=None, region=None, page=1):
 		params = {}
-		params['q'] = query
+
+		if (query):
+			params['q'] = query
 
 		# Category Group
 		if (category):
@@ -107,6 +112,9 @@ class API:
 		# Caller
 		if (region):
 			params['ca'] = region
+
+		# Page number
+		params['o'] = page
 
 		return self.perform_request(self.url_search, params)
 
@@ -121,3 +129,4 @@ class API:
 
 	def areas(self):
 		return self.get("areas")
+
