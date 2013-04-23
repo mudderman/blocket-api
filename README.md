@@ -1,7 +1,6 @@
 This client library is designed to support the Blocket REST API.
 
-Access to the API can be requested via:
-http://www2.blocket.se/support/?id=18
+Blocket does not supply a public API any more, so this wrapper are for those who can find other ways to gain acces to the api ;)
 
 Install:
 	python setup.py install
